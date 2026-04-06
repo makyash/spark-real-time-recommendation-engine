@@ -52,7 +52,12 @@ features = with_watermark\
                 avg(col("price").cast("double")).alias("avg_price_5min")
             ) 
 
-query =features.writeStream\
+# global 
+global_features = with_watermark\
+                .groupBy( window(col("event_time"), "5 minutes"),col("symbol"))\
+                .agg(count("*").alias("symbol_popularity"))
+
+query =global_features.writeStream\
         .outputMode("update")\
         .format("console")\
         .option("Truncate",False)\
